@@ -45,10 +45,16 @@ done
 rm -f /tmp/my_dummy_file.txt
 
 echo
+echo "Rename the main script from \"$DUPRO\" into \"$PROJECT_NAME\""
+FILE=$( find . -name $DUPRO )
+echo "Executing mv $FILE $(dirname $FILE)/$PROJECT_NAME"
+mv $FILE $(dirname $FILE)/$PROJECT_NAME
+
+echo
 echo "Now replace all directory names \"$DUPRO\" into \"$PROJECT_NAME\""
 for DIR in $( find . -type d -name $DUPRO )
 do
-    echo "Rename directory $DIR into $(dirname $DIR)/$PROJECT_NAME"
+    echo "Executing mv $DIR $(dirname $DIR)/$PROJECT_NAME"
     mv $DIR $(dirname $DIR)/$PROJECT_NAME
 done
 echo

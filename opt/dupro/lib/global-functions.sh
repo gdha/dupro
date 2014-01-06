@@ -5,7 +5,8 @@
 typeset -x PID=$$
 typeset -r platform=$(uname -s)         # Operating System name, e.g. Linux, HP-UX, SunOS
 typeset -r lhost=$(uname -n)            # Local host name
-typeset -r osVer=$(uname -r)            # OS Release
+typeset    osVer=$(uname -r)            # OS Release
+osVer=$(echo ${osVer#B.})               # B.11.11 becomes 11.11
 typeset -r model=$(uname -m)            # Model of the system (architecture)
 
 # we gonna remove the .sh extention from the following filenames

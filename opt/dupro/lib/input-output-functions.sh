@@ -23,12 +23,15 @@ function QuietAddExitTask {
 # remove $* from the task list
 function RemoveExitTask {
     removed=""
-    for (( c=0 ; c<${#EXIT_TASKS[@]} ; c++ )) ; do
+    c=0
+    while (( c < ${#EXIT_TASKS[@]} ))
+    do
         if test "${EXIT_TASKS[c]}" == "$*" ; then
             unset 'EXIT_TASKS[c]' # the ' ' protect from bash expansion, however unlikely to have a file named EXIT_TASKS in pwd...
             removed=yes
             Debug "Removed '$*' from the list of exit tasks"
         fi
+        c=$((c+1))
     done
     [ "$removed" == "yes" ]
     LogIfError "Could not remove exit task '$*' (not found). Exit Tasks:
@@ -144,8 +147,16 @@ function Debug {
     test "$DEBUG" && Log "$@"
 }
 
+function Echo {
+    # echo is not the same on HP-UX/Linux
+    case $platform in
+        Linux|Darwin) arg="-e " ;;
+    esac
+    echo $arg "$*"
+}
+
 function Print {
-    test "$VERBOSE" && echo -e "$*" >&7
+    test "$VERBOSE" && Echo "$*" >&7
 }
 
 # print if there is an error
@@ -156,7 +167,7 @@ function PrintIfError {
     fi
 }
 
-if [[ "$DEBUG" || "$DEBUG_SCRIPTS" ]]; then
+if (( "$DEBUG"  || "$DEBUG_SCRIPTS" )); then
     function Stamp {
         date +"%Y-%m-%d %H:%M:%S.%N "
     }

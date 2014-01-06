@@ -12,14 +12,15 @@ function Source {
             # simulate sourcing the scripts in $SHARE_DIR
             LogPrint "Source $relname"
         else
-            # step-by-step mode or brakepoint if needed
-            [[ "$STEPBYSTEP" || ( "$BREAKPOINT" && "$relname" == @($BREAKPOINT) ) ]] && read -p "Press ENTER to include '$1' ..." 2>&1
+            # step-by-step mode or breakpoint if needed
+            if [[ "$STEPBYSTEP" -eq 1 ]]; then
+                read -p "Press ENTER to include '$1' ..." 2>&1
+            fi
 
             Log "Including ${1##$SHARE_DIR/}"
             test "$DEBUGSCRIPTS" && set -x
             . "$1"
             test "$DEBUGSCRIPTS" && set +x
-            [[ "$BREAKPOINT" && "$relname" == @($BREAKPOINT) ]] && read -p "Press ENTER to continue ..." 2>&1
         fi
     else
         Debug "Skipping $1 (file not found or empty)"
@@ -34,7 +35,7 @@ function SourceStage {
     shift
     STARTSTAGE=$SECONDS
     Log "Running '$stage' stage"
-    scripts=(
+    set -A scripts \
         $(
         cd $SHARE_DIR/$stage ;
         # We always source scripts in the same subdirectory structure. The {..,..,..} way of writing
@@ -49,10 +50,10 @@ function SourceStage {
         # directory depth of the script. Basicall sed inserts a ! before and after the number which makes the
         # number always field nr. 2 when dividing lines into fields by !. The following tr removes the ! to
         # restore the original script name. But now the scripts are already in the correct order.
-        )
+
     # if no script is found, then $scripts contains only .
     # remove the . in this case
-    test "$scripts" = . && scripts=()
+    test "$scripts" = . && set -A scripts
 
     if test "${#scripts[@]}" -gt 0 ; then
         for script in ${scripts[@]} ; do

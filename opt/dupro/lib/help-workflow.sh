@@ -1,7 +1,6 @@
 # usage-workflow.sh
 #
 
-LOCKLESS_WORKFLOWS=( ${LOCKLESS_WORKFLOWS[@]} help )
 function WORKFLOW_help  {
     cat <<EOF
 Usage: $PROGRAM [-dDsSvV] [-c DIR ] COMMAND [-- ARGS...]
@@ -22,21 +21,17 @@ List of commands:
 $(
     for workflow in ${WORKFLOWS[@]} ; do
         description=WORKFLOW_${workflow}_DESCRIPTION
-        if [[ "${!description}" ]]; then
-            if [[ -z "$RECOVERY_MODE" && "$workflow" != "recover" ]]; then
-                printf " %-16s%s\n" $workflow "${!description}"
-            elif [[ "$RECOVERY_MODE" && "$workflow" == "recover" ]]; then
-                printf " %-16s%s\n" $workflow "${!description}"
-            fi
+        if [[ ! -z "${description}" ]]; then
+            printf " %-16s%s\n" $workflow "$(show_var ${description})"
         fi
     done
 )
 
 EOF
 
-if [[ -z "$VERBOSE" ]]; then
+if (( "$VERBOSE" )); then
     echo "Use '$PROGRAM -v help' for more advanced commands."
 fi
 
-    EXIT_CODE=1
+EXIT_CODE=1
 }

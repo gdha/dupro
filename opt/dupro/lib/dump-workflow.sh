@@ -4,7 +4,6 @@ WORKFLOW_dump_DESCRIPTION="dump configuration and system information"
 set -A WORKFLOWS ${WORKFLOWS[@]} "dump"
 
 function WORKFLOW_dump  {
-set -x
     LogPrint "Dumping out configuration and system information"
 
     if [ "$ARCH" != "$REAL_ARCH" ] ; then

@@ -56,7 +56,6 @@ VAR_DIR="${DIR_PREFIX}/var${TOP_DIR}"
 LOG_DIR="${VAR_DIR}/log"
 ##########################################
 
-set -A CMD_OPTS "$@"
 
 # initialize defaults
 STEPBYSTEP=
@@ -66,22 +65,18 @@ DEBUG=
 KEEP_BUILD_DIR=
 RECOVERY_MODE=
 
-while getopts "c:dDhsSvV:" opt; do
+CMD_OPTS="$*"
+
+while getopts "c:dDhsSvV" opt; do
     case "$opt" in
-       (-h|--help) WORKFLOW="help";;
-       (-V|--version) echo -e "$PRODUCT $VERSION / $RELEASE_DATE"; exit 0;;
-       (-v) VERBOSE=1;;
-       (-c) ETC_DIR="$OPTARG" ;;
-       (-d) DEBUG=1; VERBOSE=1;;
-       (-D) DEBUGSCRIPTS=1;;
-       (-s) SIMULATE=1; VERBOSE=1;;
-       (-S) STEPBYSTEP=1;;
-       (--) break;;
-       (-*)
-            "$PROGAM: unrecognized option '$option'"
-            echo "Try \"$PROGRAM --help\" for more information."
-            exit 1
-            ;;
+       (h) WORKFLOW="help";;
+       (V) echo "$PRODUCT $VERSION / $RELEASE_DATE"; exit 0;;
+       (v) VERBOSE=1;;
+       (c) ETC_DIR="$OPTARG" ;;
+       (d) DEBUG=1; VERBOSE=1;;
+       (D) DEBUGSCRIPTS=1;;
+       (s) SIMULATE=1; VERBOSE=1;;
+       (S) STEPBYSTEP=1;;
        (*) WORKFLOW="help";;
     esac
 done
@@ -139,16 +134,11 @@ for script in $LIB_DIR/*.sh ; do
     . $script
 done
 
-### new lock functionality
-##########################
+### lock functionality ###
 if [[ "$WORKFLOW" != "help" && "$WORKFLOW" != "dump" ]]; then
     AcquireLock
 fi
 
-# keep old log file
-if [[ -r "$LOGFILE" ]]; then
-    mv -f "$LOGFILE" "$LOGFILE".old 2>&8
-fi
 mkdir -p $LOG_DIR
 exec 2>"$LOGFILE" || echo "ERROR: Could not create $LOGFILE" >&2
 

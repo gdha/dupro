@@ -167,7 +167,7 @@ function PrintIfError {
     fi
 }
 
-if (( "$DEBUG"  || "$DEBUG_SCRIPTS" )); then
+if [[ ! -z "$DEBUG" ]]  || [[ ! -z "$DEBUG_SCRIPTS" ]]; then
     function Stamp {
         date +"%Y-%m-%d %H:%M:%S.%N "
     }

@@ -74,7 +74,7 @@ function cleanup_build_area_and_end_program {
     else
         Log "Removing build area $BUILD_DIR"
         rm -Rf $TMP_DIR
-        rmdir $v $BUILD_DIR >&2
+        [[ -d $BUILD_DIR ]] && rmdir $BUILD_DIR >&2
     fi
     Log "End of program reached"
 }

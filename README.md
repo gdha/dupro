@@ -3,6 +3,12 @@ dupro
 
 # Dummy Project Framework (for Korn Shell projects)
 
+### License
+
+GPLv3
+
+### Usage
+
 This project aims at creating a Korn shell scripting environment which should be portable between Linux, HP-UX, Solaris and AIX.
 Each OS can have its own directory tree as we can see with the following dump command:
 
@@ -58,7 +64,7 @@ Available options:
  -V           version information
 
 List of commands:
- clean           cleanup the LOG [/home/gdha/projects/dupro/var/opt/dupro/log] directory
+ purgelogs       purge the LOG [/home/gdha/projects/dupro/var/opt/dupro/log] directory
  dump            dump configuration and system information
 
 ````

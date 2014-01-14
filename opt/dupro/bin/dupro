@@ -31,7 +31,7 @@ STARTTIME=$SECONDS
 # Allow workflows to set the exit code to a different value.
 EXIT_CODE=0
 
-TOP_DIR="/opt/dupro"
+TOP_DIR="/opt/$PRODUCT"
 
 # Find out if we're running from checkout
 # DIR_PREFIX setting

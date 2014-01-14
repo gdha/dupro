@@ -104,16 +104,6 @@ case "$WORKFLOW" in
     ;;
 esac
 
-# Make sure we have the necessary paths (eg. in cron), /sbin will be the first path to search.
-# some needed binaries are in /lib/udev or /usr/lib/udev
-for path in /usr/bin /bin /usr/sbin /sbin; do
-    case ":$PATH:" in
-       (*:"$path":*) ;;
-       (*) if [[ -d "$path" ]]; then PATH=$path:$PATH; fi ;;
-    esac
-done
-PATH=$PATH:/lib/udev:/usr/lib/udev
-
 # are we root ?
 if [[ "$(id -u)" != "0" ]]; then
     echo "ERROR: $PRODUCT needs ROOT privileges!" >&2
@@ -137,13 +127,13 @@ for script in $LIB_DIR/*.sh ; do
     . $script
 done
 
+mkdir -p $LOG_DIR
+exec 2>"$LOGFILE" || echo "ERROR: Could not create $LOGFILE" >&2
+
 ### lock functionality ###
 if [[ "$WORKFLOW" != "help" && "$WORKFLOW" != "dump" ]]; then
     AcquireLock
 fi
-
-mkdir -p $LOG_DIR
-exec 2>"$LOGFILE" || echo "ERROR: Could not create $LOGFILE" >&2
 
 case "$WORKFLOW" in
     (help) ;;

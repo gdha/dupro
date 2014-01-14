@@ -19,6 +19,9 @@ typeset PIDFILE=${LOCKDIR}/${PROGRAM%.*}-PIDFILE
 # Functions --------------------------------------------------------------------
 # ------------------------------------------------------------------------------
 
+function IsDigit {
+    expr "$1" + 1 > /dev/null 2>&1  # sets the exit to non-zero if $1 non-numeric
+}
 
 # ------------------------------------------------------------------------------
 function LogToSyslog {
@@ -181,10 +184,40 @@ function IsVolumeGroupActive {
 }
 
 # ------------------------------------------------------------------------------
-function PurgeLogs {
-    # to remove log files older then $PurgeOlderThenDays
-    /usr/bin/find $dlog -name "$LOG_DIR/${PROGRAM%.*}-*" -type f -mtime +${PurgeOlderThenDays}  -print -exec rm -f {} \;
-    return 0
+function Timeout {
+    # function to timeout processes hanging on e.g. stale NFS mount points
+    # usage: timeout seconds commands
+    # Timeout 10 ls $mount_point >/dev/null
+    # rc=$?
+    # [[ $rc -ne 0 ]] && echo "stale $mount_point" || echo "mount point $mount_point seems not to be stale"
+
+    # argument 1: integer in seconds
+    [ "$DEBUG" ] && set -x
+    TIMEOUT=$1
+    IsDigit $TIMEOUT || Error "Timeout value must be an integer [seconds]"
+    shift
+    COMMAND="$@"
+    RET=0
+    # Launch command in backgroup
+    #[ ! "$DEBUG" ] && exec 6>&2 # Link file descriptor #6 with stderr.
+    #[ ! "$DEBUG" ] && exec 2> /dev/null # Send stderr to null (avoid the Terminated messages)
+    ##$COMMAND 2>&1 >/dev/null &
+    $COMMAND  &
+    COMMAND_PID=$!
+    [ "$DEBUG" ] && LogPrint "Background command pid $COMMAND_PID, parent pid $$"
+    # Timer that will kill the command if timesout
+    sleep $TIMEOUT && UNIX95= ps -p $COMMAND_PID -o pid,ppid |grep $$ | awk '{print $1}' | xargs kill &
+    KILLER_PID=$!
+    [ "$DEBUG" ] && LogPrint "Killer command pid $KILLER_PID, parent pid $$"
+    wait $COMMAND_PID
+    RET=$?
+    # Kill the killer timer
+    [ "$DEBUG" ] && UNIX95= ps -e -o pid,ppid |grep $KILLER_PID | awk '{print $1}' | xargs LogPrint "Killing processes: "
+    UNIX95= ps -e -o pid,ppid |grep -v PID | grep $KILLER_PID | awk '{print $1}' | xargs kill
+    wait
+    sleep 1
+    #[ ! "$DEBUG" ] && exec 2>&6 6>&- # Restore stderr and close file descriptor #6.
+    return $RET
 }
 
 # ------------------------------------------------------------------------------

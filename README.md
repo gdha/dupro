@@ -10,7 +10,7 @@ GPLv3
 ### Usage
 
 This project aims at creating a Korn shell scripting environment which should be portable between Linux, HP-UX, Solaris and AIX.
-Each OS can have its own directory tree as we can see with the following dump command:
+Each OS can have its own directory tree as we can see with the following dump command (on Linux):
 
 ````
 $ sudo opt/dupro/bin/dupro -v dump
@@ -43,6 +43,71 @@ Configuration tree:
 
 ````
 
+And on HP-UX:
+
+
+````
+#-> opt/dupro/bin/dupro dump
+dupro 1.0 / Git
+Using log file: /home/gdhaese1/projects/dupro/var/opt/dupro/log/dupro-14950-LOGFILE.log
+Dumping out configuration and system information
+System definition:
+                                    ARCH = HP-UX-ia64
+                                      OS = HP-UX
+                        OS_MASTER_VENDOR =
+                       OS_MASTER_VERSION =
+                   OS_MASTER_VENDOR_ARCH =
+                OS_MASTER_VENDOR_VERSION =
+           OS_MASTER_VENDOR_VERSION_ARCH =
+                               OS_VENDOR = HP-UX
+                              OS_VERSION = 11.31
+                          OS_VENDOR_ARCH = HP-UX/ia64
+                       OS_VENDOR_VERSION = HP-UX/11.31
+                  OS_VENDOR_VERSION_ARCH = HP-UX/11.31/ia64
+Configuration tree:
+                         HP-UX-ia64.conf : missing/empty
+                              HP-UX.conf : OK
+                              HP-UX.conf : OK
+                         HP-UX/ia64.conf : missing/empty
+                        HP-UX/11.31.conf : missing/empty
+                   HP-UX/11.31/ia64.conf : missing/empty
+                               site.conf : missing/empty
+                              local.conf : OK
+````
+
+And, on SunOS:
+
+
+````
+# opt/dupro/bin/dupro dump
+dupro 1.0 / Git
+Using log file: /export/home/gdhaese1/projects/dupro/var/opt/dupro/log/dupro-9325-LOGFILE.log
+Dumping out configuration and system information
+System definition:
+                                    ARCH = SunOS-sun4u
+                                      OS = SunOS
+                        OS_MASTER_VENDOR =
+                       OS_MASTER_VERSION =
+                   OS_MASTER_VENDOR_ARCH =
+                OS_MASTER_VENDOR_VERSION =
+           OS_MASTER_VENDOR_VERSION_ARCH =
+                               OS_VENDOR = SunOS
+                              OS_VERSION = 5.10
+                          OS_VENDOR_ARCH = SunOS/sun4u
+                       OS_VENDOR_VERSION = SunOS/5.10
+                  OS_VENDOR_VERSION_ARCH = SunOS/5.10/sun4u
+Configuration tree:
+                        SunOS-sun4u.conf : missing/empty
+                              SunOS.conf : missing/empty
+                              SunOS.conf : missing/empty
+                        SunOS/sun4u.conf : missing/empty
+                         SunOS/5.10.conf : missing/empty
+                   SunOS/5.10/sun4u.conf : missing/empty
+                               site.conf : missing/empty
+                              local.conf : OK
+````
+
+
 Each OS can have its own configuration files as well (be careful the configuration file should be treated as shell scripts as these are sourced by the main script).
 
 The help command shows the existing commands know by dupro:
@@ -64,9 +129,9 @@ Available options:
  -V           version information
 
 List of commands:
- purgelogs       purge the LOG [/home/gdha/projects/dupro/var/opt/dupro/log] directory
  dump            dump configuration and system information
-
+ mkdist          create a compressed tar archive distribution
+ purgelogs       purge the LOG [/home/gdhaese1/projects/dupro/var/opt/dupro/log] directory
 ````
 
 

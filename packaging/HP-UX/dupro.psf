@@ -1,0 +1,74 @@
+    tag dupro
+    title dupro
+    description dupro
+    copyright (c)Copyright GPL v3
+    number A.00.01
+
+product
+    tag dupro
+    title dupro
+    description dupro
+    copyright (c)Copyright GPL v3
+    revision A.00.01
+    architecture HP-UX_B.11_32/64
+    machine_type *
+    os_name HP-UX
+    os_release ?.11.*
+    os_version *
+    is_locatable false
+    is_patch false
+    vendor_tag GPL
+    readme < ../../README.md
+    preinstall preinstall.sh
+    postinstall postinstall.sh
+    configure configure.sh
+    postremove postremove.sh
+
+    fileset
+        tag dupro-SCRIPTS
+        title dupro script
+        revision A.00.01
+        description dupro script
+
+        directory ../../opt/dupro/bin = /opt/dupro/bin
+        file_permissions -o root -g sys -m 755
+        file -m 755 -o root -g sys dupro
+
+        directory ../../opt/dupro/lib = /opt/dupro/lib
+        file_permissions -o root -g sys -m 755
+        file *
+
+        directory ../../opt/dupro/scripts = /opt/dupro/scripts
+        file_permissions -o root -g sys -m 755
+        file *
+
+
+    end
+
+    fileset
+        tag dupro-CONFIG
+        title dupro configuration files
+        revision A.00.01
+        description dupro configuration files
+
+        directory ../../etc/opt/dupro = /etc/opt/dupro
+        file_permissions -o root -g sys -m 755
+        file *
+    end
+
+    fileset
+        tag dupro-VAR
+	title dupro var files
+	revision A.00.01
+	description dupro var files
+
+	directory ../../var/opt/dupro = /var/opt/dupro
+	file_permissions -o root -g sys -m 755
+
+	directory ../../var/opt/dupro/log = /var/opt/dupro/log
+	file *
+	exclude .gitignore
+	exclude *.log
+    end
+
+end # of product

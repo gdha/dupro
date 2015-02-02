@@ -140,7 +140,7 @@ case "$WORKFLOW" in
     (*)
        LogPrint "$PRODUCT $VERSION / $RELEASE_DATE"
        Log "Command line options: $0 ${CMD_OPTS[@]}"
-       if (( "$VERBOSE" )); then
+       if (( VERBOSE )); then
           LogPrint "Using log file: $LOGFILE"
        fi
        ;;
@@ -150,7 +150,7 @@ v=""
 verbose=""
 # enable progress subsystem only in verbose mode, set some stuff that others can use
 if (( "$VERBOSE" )); then
-    Source $LIB_DIR/progresssubsystem.nosh
+    #Source $LIB_DIR/progresssubsystem.nosh
     v="-v"
     verbose="--verbose"
 fi

@@ -31,9 +31,5 @@ $(
 
 EOF
 
-if (( VERBOSE )); then
-    echo "Use '$PROGRAM -v help' for more advanced commands."
-fi
-
 EXIT_CODE=1
 }

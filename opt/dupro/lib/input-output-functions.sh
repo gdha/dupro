@@ -151,12 +151,13 @@ function Echo {
     # echo is not the same on HP-UX/Linux
     case $platform in
         Linux|Darwin) arg="-e " ;;
+        *) arg="" ;;
     esac
     echo $arg "$*"
 }
 
 function Print {
-    test "$VERBOSE" && Echo "$*" >&7
+    test "$VERBOSE" && echo "$*" >&7
 }
 
 # print if there is an error
@@ -211,22 +212,22 @@ function LogPrintIfError {
 exec 8>/dev/null # start ProgressPipe listening at fd 8
 QuietAddExitTask "exec 8>&-" # new method, close fd 8 at exit
 
-function ProgressStart {
-    : ;
+
+function ReadCurrentStatus {
+    # read the last line of the $STATUS_FILE (input arg1; output status as string)
+    [[ ! -f $1 ]] && SetCurrentStatus "$1"
+    tail -1 $1 | awk '{print $3}'
 }
 
-function ProgressStop {
-    : ;
+function SetCurrentStatus {
+    # append the content of $CURRENT_STATUS (exported var) to the $STATUS_FILE
+    # input arg is $STATUS_FILE; output 0 success or 1 failure)
+    [[ -z "$CURRENT_STATUS" ]] && CURRENT_STATUS="$stage:start"
+    if [[ ! -f $1 ]]; then
+        # first time we ever run this tool
+        Log "Initialize $1 with status \"$CURRENT_STATUS\""
+    fi
+    # 2014-03-20 13:23:59 prep:ended
+    echo "$(Stamp)$CURRENT_STATUS" >> $1
 }
 
-function ProgressError {
-    : ;
-}
-
-function ProgressStep {
-    : ;
-}
-
-function ProgressInfo {
-    : ;
-}

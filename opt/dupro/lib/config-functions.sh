@@ -10,8 +10,8 @@ function SetOSVendorAndVersion  {
     case $platform in
         Linux)
                 if [ -f /etc/os-release ] ; then
-                    ID=$( grep ^ID /etc/os-release | cut -d= -f2 | sed -e 's/"//g' )
-                    VERSION_ID=$( grep ^VERSION_ID /etc/os-release | cut -d= -f2 | sed -e 's/"//g' | cut -d. -f1 )
+                    ID=$( grep "^ID=" /etc/os-release | cut -d= -f2 | sed -e 's/"//g' )
+                    VERSION_ID=$( grep "^VERSION_ID=" /etc/os-release | cut -d= -f2 | sed -e 's/"//g' | cut -d. -f1 )
                     OS_VENDOR="$ID"
                     OS_VERSION="$VERSION_ID"
                 elif [ -f /etc/SuSE-release ] ; then
@@ -28,10 +28,16 @@ function SetOSVendorAndVersion  {
                     OS_VERSION=none
                 fi
                 ;;
-        *)     # HP-UX, Solaris, AIX
-               OS_VENDOR="$platform"
-               OS_VERSION=$osVer
-               ;;
+        HP-UX)  OS_VENDOR="hp"
+                OS_VERSION=$osVer
+                ;;
+        SunOS)  OS_VENDOR="oracle"
+                OS_VERSION=$osVer
+                ;;
+        *)      # AIX, others....
+                OS_VENDOR="$platform"
+                OS_VERSION=$osVer
+                ;;
     esac
     if test "$OS_VENDOR" = generic -o "$OS_VERSION" = none ; then
 
@@ -56,8 +62,8 @@ function SetOSVendorAndVersion  {
 
     # combined stuff
     OS_VENDOR_VERSION="$OS_VENDOR/$OS_VERSION"
-    OS_VENDOR_ARCH="$OS_VENDOR/$model"
-    OS_VENDOR_VERSION_ARCH="$OS_VENDOR/$OS_VERSION/$model"
+    OS_VENDOR_ARCH="$OS_VENDOR/$REAL_MACHINE"
+    OS_VENDOR_VERSION_ARCH="$OS_VENDOR/$OS_VERSION/$REAL_MACHINE"
 
     # add OS_MASTER_* vars in case this is a derived OS
     case "$( echo $OS_VENDOR_VERSION | tr '[:upper:]' '[:lower:]' )" in
@@ -95,8 +101,8 @@ function SetOSVendorAndVersion  {
     # combined stuff for OS_MASTER_*
     if [ "$OS_MASTER_VENDOR" ] ; then
         OS_MASTER_VENDOR_VERSION="$OS_MASTER_VENDOR/$OS_MASTER_VERSION"
-        OS_MASTER_VENDOR_ARCH="$OS_MASTER_VENDOR/$model"
-        OS_MASTER_VENDOR_VERSION_ARCH="$OS_MASTER_VENDOR/$OS_MASTER_VERSION/$model"
+        OS_MASTER_VENDOR_ARCH="$OS_MASTER_VENDOR/$REAL_MACHINE"
+        OS_MASTER_VENDOR_VERSION_ARCH="$OS_MASTER_VENDOR/$OS_MASTER_VERSION/$REAL_MACHINE"
     fi
 
 }
@@ -108,3 +114,58 @@ function show_var {
     VAR="\$${1}"
     eval echo ${VAR}
 }
+
+function ParseIniFile {
+    # this function read an INI_SECTION (the only argument!) and parse this ini file
+    # into variables which can be used further along the script
+    # the INI_FILE should be a global variable defined in default.conf (or local.conf)
+    ###
+    # the ini file content looks like:
+    ###
+        # # comment line 1
+        # ; comment line 2
+        # [remove]
+        # command[0]      =       $SWREMOVE
+        # options[0]      =       "-x mount_all_filesystems=false  -x enforce_dependencies=false"
+        # bundle[0]       =       CFG2HTML
+        # version[0]      =       C.06.00         ; cfg2html
+        # bundle[1]       =       DUPRO
+        # version[1]      =       A.01.0          ; dupro
+        #
+        # [preinstall]
+        # command[0]      =       shutdown -h 0
+        # command[1]      =       any-news
+    ###   
+    # we can use somewhere in sub-script the following to parse the [text] into section
+    # so we can define different kind of operation across several sections (which avoid
+    # an ini file per operation
+    ###
+        # for ini in $( grep "^\[" $INI_FILE | sed -e 's/\[//' -e 's/\]//' )
+        # do
+        # unset command
+        # unset options
+        # unset bundle
+        # unset version
+        #
+        # parse_ini_file $ini
+        # cmdline="$command $options $bundle,r=$version"
+        # echo $cmdline
+        # done
+
+    INI_SECTION="$1"
+    eval $( sed -e 's/[[:space:]]*\=[[:space:]]*/=/g' \
+        -e 's/;.*$//' \
+        -e 's/[[:space:]]*$//' \
+        -e 's/^[[:space:]]*//' \
+        -e "s/^\(.*\)=\([^\"']*\)$/\1=\"\2\"/" \
+        < $INI_FILE \
+        | sed -n -e "/^\[$INI_SECTION\]/,/^\s*\[/{/^[^;].*\=.*/p;}" )
+
+    # ${command[@]} : array of commands
+    # ${options[@]} : array of options for commands array
+    # ${bundle[@]}  : array of the software bundle we want to install, remove, upgrade
+    # ${version[@]} : array of the expected version of above mentioned bundle array
+    # be aware that bundle[0] and version [0] belong together
+    # if our array command contain more then 1 command then we should loop over the array of bundles
+}
+

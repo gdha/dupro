@@ -9,10 +9,19 @@ if [[ -z "$1" ]]; then
     exit 1
 fi
 
+function _echo
+{
+        case $platform in
+                Linux|Darwin) arg="-e " ;;
+        esac
+        echo $arg "$*"
+} # echo is not the same between UNIX and Linux
+
+
 PROJECT_NAME="$1"
 
 echo "Project name you choose is $PROJECT_NAME"
-echo -e "Is this correct [y/N]? \c"
+_echo "Is this correct [y/N]? \c"
 read Answer
 if [[ "$Answer" = [yY] ]]; then
     echo
@@ -23,7 +32,7 @@ else
 fi
 
 echo "Current directory is $PWD"
-echo -e "Please confirm this is correct before we proceed [y/N] \c"
+_echo "Please confirm this is correct before we proceed [y/N] \c"
 read Answer
 if [[ "$Answer" = [yY] ]]; then
     echo
@@ -46,9 +55,19 @@ rm -f /tmp/my_dummy_file.txt
 
 echo
 echo "Rename the main script from \"$DUPRO\" into \"$PROJECT_NAME\""
-FILE=$( find . -name $DUPRO )
-echo "Executing mv $FILE $(dirname $FILE)/$PROJECT_NAME"
-mv $FILE $(dirname $FILE)/$PROJECT_NAME
+for FILE in $( find . -type f -name "$DUPRO*" )
+do
+    EXT="" 
+    FNAME=${FILE##*/}    # ./opt/dupro/man/dupro.8 => dupro.8
+    EXT=${FNAME##*.}     # dupro.8 => 8
+    if [[ -z "$EXT" ]]; then
+        NAME="$PROJECT_NAME"
+    else
+        NAME="$PROJECT_NAME.$EXT"
+    fi
+    echo "Executing mv $FILE $(dirname $FILE)/$NAME"
+    mv $FILE $(dirname $FILE)/$NAME
+done
 
 echo
 echo "Now replace all directory names \"$DUPRO\" into \"$PROJECT_NAME\""
@@ -63,6 +82,10 @@ echo "$PWD into $(dirname $PWD)/$PROJECT_NAME"
 mv $PWD $(dirname $PWD)/$PROJECT_NAME
 cd ..
 cd $PROJECT_NAME
+
+echo chmod 755 $PROJECT_NAME/opt/$PROJECT_NAME/bin/$PROJECT_NAME
+chmod 755 $PROJECT_NAME/opt/$PROJECT_NAME/bin/$PROJECT_NAME
+
 echo
 echo "Current project directory is $PWD"
 echo "done"
